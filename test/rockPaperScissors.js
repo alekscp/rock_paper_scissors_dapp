@@ -5,6 +5,8 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 contract("RockPaperScissors", (accounts) => {
   let contract;
   const [player, contestant] = accounts;
+  const [rock, paper, scissors] = [1, 2, 3];
+  const [saltOne, saltTwo] = [10, 20];
 
   const stateMappings = {
     created: 0,
@@ -74,14 +76,16 @@ contract("RockPaperScissors", (accounts) => {
     })
   })
 
-  describe("commitMove", () => {
+  describe.only("commitMove", () => {
     it("Commits sender's move to the game", async () => {
       await contract.createGame(contestant, { from: player, value: 100 });
       await contract.joinGame(0, { from: contestant, value: 100 });
+      await contract.commitMove(0, rock, saltOne, { from: player });
+      await contract.commitMove(0, paper, saltOne, { from: contestant });
 
       const game = await contract.games(0);
 
-      assert.equal(game.state.toNumber(), stateMappings.joined)
+      assert.equal(game.state.toNumber(), stateMappings.commited)
     })
   })
 });

@@ -19,6 +19,12 @@ contract RockPaperScissors {
     mapping(uint => Game) public games;
     uint public gameID;
 
+    struct Move {
+      bytes32 hash;
+      uint value;
+    }
+    mapping(uint => mapping(address => Move)) public moves;
+
     function createGame(address payable contestant) external payable {
         require(msg.value > 0, "You have to send some ether");
 
@@ -49,5 +55,20 @@ contract RockPaperScissors {
         g.state = State.Joined;
     }
 
-    // function commitMove(uint _gameID, 
+    function commitMove(uint _gameID, uint moveID, uint salt) external {
+        Game storage g = games[_gameID];
+
+        require(g.state == State.Joined, "Game must be in Joined state");
+        require(msg.sender == g.players[0] || msg.sender == g.players[1], "Sender is not one of the game players");
+        require(moves[_gameID][msg.sender].hash == 0, "Move already commited");
+        require(moveID == 1 || moveID == 2 || moveID == 3, "Move needs to be one of 1, 2 or 3");
+
+        moves[_gameID][msg.sender].hash = keccak256(abi.encodePacked(moveID, salt));
+        moves[_gameID][msg.sender].value = 0;
+
+        // Change state when both players have commited a move
+        if (moves[_gameID][g.players[0]].hash != 0 && moves[_gameID][g.players[1]].hash != 0) {
+            g.state = State.Commited;
+        }
+    }
 }
