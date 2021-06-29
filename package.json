@@ -1,0 +1,17 @@
+{
+  "name": "rockpaperscissors",
+  "version": "1.0.0",
+  "description": "Simple Rock Paper Scissors game build on Ethereum",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alekscp",
+  "license": "ISC",
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.11"
+  }
+}
