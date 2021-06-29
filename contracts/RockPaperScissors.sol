@@ -25,6 +25,14 @@ contract RockPaperScissors {
     }
     mapping(uint => mapping(address => Move)) public moves;
 
+    mapping(uint => uint) public winningCombinations;
+
+    constructor() {
+        winningCombinations[1] = 3; // Rock beats scissors
+        winningCombinations[2] = 1; // Paper beats rock
+        winningCombinations[3] = 2; // Scissors beat paper
+    }
+
     function createGame(address payable contestant) external payable {
         require(msg.value > 0, "You have to send some ether");
 
@@ -69,6 +77,34 @@ contract RockPaperScissors {
         // Change state when both players have commited a move
         if (moves[_gameID][game.players[0]].hash != 0 && moves[_gameID][game.players[1]].hash != 0) {
             game.state = State.Commited;
+        }
+    }
+
+    function revealMove(uint _gameID, uint moveID, uint salt) external {
+        Game storage game = games[_gameID];
+        Move storage moveOne = moves[_gameID][game.players[0]];
+        Move storage moveTwo = moves[_gameID][game.players[1]];
+        Move storage moveSender = moves[_gameID][msg.sender];
+
+        require(game.state == State.Commited, "Game must be in Commited state");
+        require(msg.sender == game.players[0] || msg.sender == game.players[1], "Sender is not one of the game players");
+        require(moveSender.hash == keccak256(abi.encodePacked(moveID, salt)), "MoveID does not match commitment");
+
+        moveSender.value = moveID;
+
+        // Conclude game only if both moves have been saved
+        if (moveOne.value != 0 && moveTwo.value != 0) {
+            if (moveOne.value == moveTwo.value) { // Tie game, refund both players
+                game.players[0].transfer(game.bet);
+                game.players[1].transfer(game.bet);
+                game.state = State.Revealed;
+                return;
+            }
+
+            address payable winner;
+            winner = winningCombinations[moveOne.value] == moveTwo.value ? game.players[0] : game.players[1];
+            winner.transfer(2 * game.bet);
+            game.state = State.Revealed;
         }
     }
 }

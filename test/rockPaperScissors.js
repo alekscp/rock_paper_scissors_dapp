@@ -130,4 +130,18 @@ contract("RockPaperScissors", (accounts) => {
       )
     })
   })
+
+  describe.only("revealMove", () => {
+    it("Reveals the moves", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+      await contract.commitMove(0, rock, saltOne, { from: player });
+      await contract.commitMove(0, paper, saltOne, { from: contestant });
+      await contract.revealMove(0, rock, saltOne, { from: player })
+
+      const game = await contract.games(0)
+
+      assert.equal(game.state.toNumber(), stateMappings.revealed);
+    })
+  })
 });
