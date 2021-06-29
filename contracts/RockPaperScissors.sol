@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.6;
 
-contract RockPapperScissors {
+contract RockPaperScissors {
     enum State {
         Created,
         Joined,
