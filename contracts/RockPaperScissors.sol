@@ -42,24 +42,24 @@ contract RockPaperScissors {
     }
 
     function joinGame(uint _gameID) external payable {
-        Game storage g = games[_gameID];
+        Game storage game = games[_gameID];
 
-        require(msg.sender == g.players[1], "Sender must be second player");
-        require(msg.value >= g.bet, "More ether needs to be sent in order to join");
-        require(g.state == State.Created, "Game must be in Created state");
+        require(msg.sender == game.players[1], "Sender must be second player");
+        require(msg.value >= game.bet, "More ether needs to be sent in order to join");
+        require(game.state == State.Created, "Game must be in Created state");
 
-        if (msg.value > g.bet) {
-          payable(msg.sender).transfer(msg.value - g.bet); // Sender only pays bet value, refund difference otherwise
+        if (msg.value > game.bet) {
+          payable(msg.sender).transfer(msg.value - game.bet); // Sender only pays bet value, refund difference otherwise
         }
 
-        g.state = State.Joined;
+        game.state = State.Joined;
     }
 
     function commitMove(uint _gameID, uint moveID, uint salt) external {
-        Game storage g = games[_gameID];
+        Game storage game = games[_gameID];
 
-        require(g.state == State.Joined, "Game must be in Joined state");
-        require(msg.sender == g.players[0] || msg.sender == g.players[1], "Sender is not one of the game players");
+        require(game.state == State.Joined, "Game must be in Joined state");
+        require(msg.sender == game.players[0] || msg.sender == game.players[1], "Sender is not one of the game players");
         require(moves[_gameID][msg.sender].hash == 0, "Move already commited");
         require(moveID == 1 || moveID == 2 || moveID == 3, "Move must be one of 1, 2 or 3");
 
@@ -67,8 +67,8 @@ contract RockPaperScissors {
         moves[_gameID][msg.sender].value = 0;
 
         // Change state when both players have commited a move
-        if (moves[_gameID][g.players[0]].hash != 0 && moves[_gameID][g.players[1]].hash != 0) {
-            g.state = State.Commited;
+        if (moves[_gameID][game.players[0]].hash != 0 && moves[_gameID][game.players[1]].hash != 0) {
+            game.state = State.Commited;
         }
     }
 }
