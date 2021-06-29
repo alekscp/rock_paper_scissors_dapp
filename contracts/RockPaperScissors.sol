@@ -61,7 +61,7 @@ contract RockPaperScissors {
         require(g.state == State.Joined, "Game must be in Joined state");
         require(msg.sender == g.players[0] || msg.sender == g.players[1], "Sender is not one of the game players");
         require(moves[_gameID][msg.sender].hash == 0, "Move already commited");
-        require(moveID == 1 || moveID == 2 || moveID == 3, "Move needs to be one of 1, 2 or 3");
+        require(moveID == 1 || moveID == 2 || moveID == 3, "Move must be one of 1, 2 or 3");
 
         moves[_gameID][msg.sender].hash = keccak256(abi.encodePacked(moveID, salt));
         moves[_gameID][msg.sender].value = 0;

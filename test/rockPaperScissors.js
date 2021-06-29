@@ -4,7 +4,7 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("RockPaperScissors", (accounts) => {
   let contract;
-  const [player, contestant] = accounts;
+  const [player, contestant, otherPlayer] = accounts;
   const [rock, paper, scissors] = [1, 2, 3];
   const [saltOne, saltTwo] = [10, 20];
 
@@ -76,7 +76,7 @@ contract("RockPaperScissors", (accounts) => {
     })
   })
 
-  describe.only("commitMove", () => {
+  describe("commitMove", () => {
     it("Commits sender's move to the game", async () => {
       await contract.createGame(contestant, { from: player, value: 100 });
       await contract.joinGame(0, { from: contestant, value: 100 });
@@ -86,6 +86,48 @@ contract("RockPaperScissors", (accounts) => {
       const game = await contract.games(0);
 
       assert.equal(game.state.toNumber(), stateMappings.commited)
+    })
+
+    it("Fails if the game is not in Joined state", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+
+      await expectRevert(
+        contract.commitMove(0, rock, saltOne, { from: player }),
+        "Game must be in Joined state"
+      )
+    })
+
+    it("Fails if the sender is not one of the players taking part in the game", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+
+      await expectRevert(
+        contract.commitMove(0, scissors, saltOne, { from: otherPlayer }),
+        "Sender is not one of the game players"
+      )
+    })
+
+    it("Fails if the move was already commited", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+      await contract.commitMove(0, rock, saltOne, { from: player });
+
+      await expectRevert(
+        contract.commitMove(0, rock, saltOne, { from: player }),
+        "Move already commited"
+      )
+    })
+
+    it("Fails if move is not one of 1, 2 or 3", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+
+      const otherMove = 4;
+
+      await expectRevert(
+        contract.commitMove(0, otherMove, saltOne, { from: player }),
+        "Move must be one of 1, 2 or 3"
+      )
     })
   })
 });
