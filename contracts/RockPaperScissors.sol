@@ -17,7 +17,7 @@ contract RockPaperScissors {
         State state;
     }
     mapping(uint => Game) public games;
-    uint public gameId;
+    uint public gameID;
 
     function createGame(address payable contestant) external payable {
         require(msg.value > 0, "You have to send some ether");
@@ -27,16 +27,16 @@ contract RockPaperScissors {
         players[0] = payable(msg.sender);
         players[1] = contestant;
 
-        games[gameId].id = gameId;
-        games[gameId].bet = msg.value;
-        games[gameId].players = players;
-        games[gameId].state = State.Created;
+        games[gameID].id = gameID;
+        games[gameID].bet = msg.value;
+        games[gameID].players = players;
+        games[gameID].state = State.Created;
 
-        gameId++;
+        gameID++;
     }
 
-    function joinGame(uint _gameId) external payable {
-        Game storage g = games[_gameId];
+    function joinGame(uint _gameID) external payable {
+        Game storage g = games[_gameID];
 
         require(msg.sender == g.players[1], "Sender must be second player");
         require(msg.value >= g.bet, "More ether needs to be sent in order to join");
@@ -48,4 +48,6 @@ contract RockPaperScissors {
 
         g.state = State.Joined;
     }
+
+    // function commitMove(uint _gameID, 
 }
