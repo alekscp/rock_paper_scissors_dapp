@@ -44,5 +44,33 @@ contract("RockPaperScissors", (accounts) => {
 
       assert.equal(game.state.toNumber(), stateMappings.joined)
     })
+
+    it("Fails if sender is not the second player", async () => {
+      await contract.createGame(player2, { from: player1, value: 100 })
+
+      await expectRevert(
+        contract.joinGame(0, { from: player1, value: 100 }),
+        "Sender must be second player"
+      )
+    })
+
+    it("Fails if value sent is not sufficient", async () => {
+      await contract.createGame(player2, { from: player1, value: 100 })
+
+      await expectRevert(
+        contract.joinGame(0, { from: player2, value: 50 }),
+        "More ether needs to be sent in order to join"
+      )
+    })
+
+    it("Fails if the game is not in Created state", async () => {
+      await contract.createGame(player2, { from: player1, value: 100 })
+      await contract.joinGame(0, { from: player2, value: 100 }),
+
+      await expectRevert(
+        contract.joinGame(0, { from: player2, value: 100 }),
+        "Game must be in Created state"
+      )
+    })
   })
 });
