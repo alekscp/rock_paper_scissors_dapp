@@ -4,7 +4,7 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("RockPaperScissors", (accounts) => {
   let contract;
-  const [player1, player2] = accounts;
+  const [player, contestant] = accounts;
 
   const stateMappings = {
     created: 0,
@@ -19,7 +19,7 @@ contract("RockPaperScissors", (accounts) => {
 
   describe("createGame", () => {
     it("Creates a game", async () => {
-      await contract.createGame(player2, { from: player1, value: 100 });
+      await contract.createGame(contestant, { from: player, value: 100 });
       const game = await contract.games(0);
 
       assert.equal(game.id.toNumber(), 0);
@@ -29,7 +29,7 @@ contract("RockPaperScissors", (accounts) => {
 
     it("Fails when called without a value", async () => {
       await expectRevert(
-        contract.createGame(player2, { from: player1 }),
+        contract.createGame(contestant, { from: player }),
         "You have to send some ether"
       );
     });
@@ -37,8 +37,8 @@ contract("RockPaperScissors", (accounts) => {
 
   describe("joinGame", () => {
     it("Joins sender to game as player 2", async () => {
-      await contract.createGame(player2, { from: player1, value: 100 });
-      await contract.joinGame(0, { from: player2, value: 100 });
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
 
       const game = await contract.games(0);
 
@@ -46,31 +46,42 @@ contract("RockPaperScissors", (accounts) => {
     })
 
     it("Fails if sender is not the second player", async () => {
-      await contract.createGame(player2, { from: player1, value: 100 })
+      await contract.createGame(contestant, { from: player, value: 100 })
 
       await expectRevert(
-        contract.joinGame(0, { from: player1, value: 100 }),
+        contract.joinGame(0, { from: player, value: 100 }),
         "Sender must be second player"
       )
     })
 
     it("Fails if value sent is not sufficient", async () => {
-      await contract.createGame(player2, { from: player1, value: 100 })
+      await contract.createGame(contestant, { from: player, value: 100 })
 
       await expectRevert(
-        contract.joinGame(0, { from: player2, value: 50 }),
+        contract.joinGame(0, { from: contestant, value: 50 }),
         "More ether needs to be sent in order to join"
       )
     })
 
     it("Fails if the game is not in Created state", async () => {
-      await contract.createGame(player2, { from: player1, value: 100 })
-      await contract.joinGame(0, { from: player2, value: 100 }),
+      await contract.createGame(contestant, { from: player, value: 100 })
+      await contract.joinGame(0, { from: contestant, value: 100 }),
 
       await expectRevert(
-        contract.joinGame(0, { from: player2, value: 100 }),
+        contract.joinGame(0, { from: contestant, value: 100 }),
         "Game must be in Created state"
       )
+    })
+  })
+
+  describe("commitMove", () => {
+    it("Commits sender's move to the game", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+
+      const game = await contract.games(0);
+
+      assert.equal(game.state.toNumber(), stateMappings.joined)
     })
   })
 });
