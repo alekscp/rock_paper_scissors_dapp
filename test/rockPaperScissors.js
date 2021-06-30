@@ -196,15 +196,33 @@ contract("RockPaperScissors", (accounts) => {
       );
     });
 
-    it.only("Fails if the game is not in the Commited state", async () => {
+    it("Fails if the game is not in the Commited state", async () => {
       await contract.createGame(contestant, { from: player, value: 100 });
       await contract.joinGame(0, { from: contestant, value: 100 });
       await contract.commitMove(0, rock, saltOne, { from: player });
-      // await contract.commitMove(0, scissors, saltTwo, { from: contestant });
-      
+
+      await expectRevert(contract.revealMove(0, rock, saltOne, { from: player }), "Game must be in Commited state");
+    });
+
+    it("Fails if the sender is not one of the players taking part in the game", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+      await contract.commitMove(0, rock, saltOne, { from: player });
+      await contract.commitMove(0, scissors, saltTwo, { from: contestant });
+
       await expectRevert(
-        contract.revealMove(0, rock, saltOne, { from: player })
-      )
-    })
+        contract.revealMove(0, rock, saltOne, { from: otherPlayer }),
+        "Sender is not one of the game players"
+      );
+    });
+
+    it("Fails if modeID does not match the commitment", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+      await contract.commitMove(0, rock, saltOne, { from: player });
+      await contract.commitMove(0, scissors, saltTwo, { from: contestant });
+
+      await expectRevert(contract.revealMove(0, paper, saltOne, { from: player }), "MoveID does not match commitment");
+    });
   });
 });
