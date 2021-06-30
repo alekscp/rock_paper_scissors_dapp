@@ -19,3 +19,5 @@ const getWeb3 = async () => {
 
   web3 = new Web3("http://localhost:8545")
 };
+
+export { getWeb3 }
