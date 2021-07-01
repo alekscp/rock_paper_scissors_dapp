@@ -77,7 +77,7 @@ contract RockPaperScissors {
         require(moveID == 1 || moveID == 2 || moveID == 3, "Move must be one of 1, 2 or 3");
 
         moves[_gameID][msg.sender].hash = keccak256(abi.encodePacked(moveID, salt));
-        moves[_gameID][msg.sender].value = 0;
+        moves[_gameID][msg.sender].value = moveID;
 
         // Change state when both players have commited a move
         if (moves[_gameID][game.players[0]].hash != 0 && moves[_gameID][game.players[1]].hash != 0) {
