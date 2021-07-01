@@ -46,8 +46,9 @@ function App() {
     gameID = gameID > 0 ? gameID - 1 : gameID;
 
     const instanceGame = await contract.methods.games(gameID).call();
-    const instanceGameStatus = instanceGame[3] || '0'
-    setGame({ id: instanceGame[0], bet: instanceGame[1], players: instanceGame[2], state: instanceGame[3] || '0' });
+    const players = await contract.methods.getGamePlayers(gameID).call();
+
+    setGame({ id: instanceGame[0], bet: instanceGame[1], state: instanceGame[2], players: players });
   }
 
   async function createGame(e) {
@@ -72,7 +73,7 @@ function App() {
 
     const select = e.target.elements[0];
     const moveID = select.options[select.selectedIndex].value;
-    const salt = Math.floor(Math.randon() * 1000);
+    const salt = Math.floor(Math.random() * 1000);
 
     await contract.methods.commitMove(game.id, moveID, salt).send({ from: accounts[0] });
     setMove({ id: moveID, salt: salt });
@@ -89,7 +90,7 @@ function App() {
   }
 
   if (typeof game.state === 'undefined') {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -135,7 +136,7 @@ function App() {
       {game.state === '1' && game.players[1].toLowerCase() === accounts[0].toLowerCase() ? (
         <div className="row">
           <div className="col-sm-12">
-            <h2>Bet</h2>
+            <h2>Bet and join the game</h2>
             <button onClick={(e) => joinGame()} type="submit" className="btn btn-primary">
               Submit
             </button>
