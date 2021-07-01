@@ -4,7 +4,9 @@ const getWeb3 = async () => {
   let web3;
 
   if (window.ethereum) {
-    await window.ethereum.request("eth_requestAccounts");
+    await window.ethereum.request({
+      method:  "eth_requestAccounts"
+    });
 
     web3 = new Web3(window.ethereum);
 
