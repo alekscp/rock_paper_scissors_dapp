@@ -4,6 +4,7 @@ pragma solidity ^0.8.6;
 
 contract RockPaperScissors {
     enum State {
+        Idle,
         Created,
         Joined,
         Commited,
