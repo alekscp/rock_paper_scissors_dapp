@@ -34,6 +34,18 @@ contract("RockPaperScissors", (accounts) => {
     });
   });
 
+  describe("getGamePlayers", () => {
+    it("Returns the players participating in a given game", async () => {
+      await contract.createGame(contestant, { from: player, value: 100 });
+      await contract.joinGame(0, { from: contestant, value: 100 });
+
+      const players = await contract.getGamePlayers(0);
+
+      assert.isArray(players)
+      assert.deepEqual([player, contestant], players);
+    })
+  })
+
   describe("joinGame", () => {
     it("Joins sender to game as player 2", async () => {
       await contract.createGame(contestant, { from: player, value: 100 });

@@ -49,6 +49,10 @@ contract RockPaperScissors {
         gameID++;
     }
 
+    function getGamePlayers(uint _gameID) public view returns(address payable[] memory) {
+        return games[_gameID].players;
+    }
+
     function joinGame(uint _gameID) external payable {
         Game storage game = games[_gameID];
 
