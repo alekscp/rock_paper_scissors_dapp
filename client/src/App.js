@@ -45,8 +45,9 @@ function App() {
     let gameID = parseInt(await contract.methods.gameID().call());
     gameID = gameID > 0 ? gameID - 1 : gameID;
 
-    const game = await contract.methods.games(gameID).call();
-    setGame({ id: game[0], bet: game[1], players: game[2], state: game[3] });
+    const instanceGame = await contract.methods.games(gameID).call();
+    const instanceGameStatus = instanceGame[3] || '0'
+    setGame({ id: instanceGame[0], bet: instanceGame[1], players: instanceGame[2], state: instanceGame[3] || '0' });
   }
 
   async function createGame(e) {
@@ -85,6 +86,10 @@ function App() {
     setMove(undefined);
 
     await updateGame();
+  }
+
+  if (typeof game.state === 'undefined') {
+    return <div>Loading...</div>
   }
 
   return (
