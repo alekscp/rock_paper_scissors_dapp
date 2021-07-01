@@ -52,13 +52,40 @@ function App() {
   async function createGame(e) {
     e.preventDefault();
 
-    const participants = e.target.elements[0].value;
+    const contestant = e.target.elements[0].value;
     const bet = e.target.elements[1].value;
+
+    await contract.methods.createGame(contestant).send({ from: accounts[0], value: bet });
+
+    await updateGame();
   }
 
-  async function joingame() {}
-  async function commitMove() {}
-  async function revealMove() {}
+  async function joinGame() {
+    await contract.methods.joinGame(game.id).send({ from: accounts[0], value: game.bet });
+
+    await updateGame();
+  }
+
+  async function commitMove(e) {
+    e.preventDefault();
+
+    const select = e.target.elements[0];
+    const moveID = select.options[select.selectedIndex].value;
+    const salt = Math.floor(Math.randon() * 1000);
+
+    await contract.methods.commitMove(game.id, moveID, salt).send({ from: accounts[0] });
+    setMove({ id: moveID, salt: salt });
+
+    await updateGame();
+  }
+
+  async function revealMove() {
+    await contract.methods.revealMove(game.id, move.id, move.salt).send({ from: accounts[0] });
+
+    setMove(undefined);
+
+    await updateGame();
+  }
 
   return (
     <div className="container">
@@ -100,43 +127,48 @@ function App() {
         </div>
       ) : null}
 
-        {game.state === '1'
-            && game.players[1].toLowerCase() === accounts[0].toLowerCase() ? (
-              <div className="row">
-                <div className="col-sm-12">
-                  <h2>Bet</h2>
-                  <button onClick={e => joinGame()} type="submit" className="btn btn-primary">Submit</button>
-                </div>
-              </div>
-            ) : null}
-
-        {game.state === '2' ? (
-          <div className="row">
-            <div className="col-sm-12">
-              <h2>Commit Move</h2>
-              <form onSubmit={() => commmitMove(e)}>
-                <div className="form-group">
-                  <label htmlFor="move">Move</label>
-                  <select className="form-control" id="move">
-                    <option value="1">Rock</option>
-                    <option value="2">Paper</option>
-                    <option value="3">Scissors</option>
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-primary">Submit</button>
-              </form>
-            </div>
+      {game.state === '1' && game.players[1].toLowerCase() === accounts[0].toLowerCase() ? (
+        <div className="row">
+          <div className="col-sm-12">
+            <h2>Bet</h2>
+            <button onClick={(e) => joinGame()} type="submit" className="btn btn-primary">
+              Submit
+            </button>
           </div>
-        ) : null}
+        </div>
+      ) : null}
 
-          {game.state === '3' ? (
-            <div className="row">
-              <div className="col-sm-12">
-                <h2>Reveal Move</h2>
-                <button onClick={() => revealMove()} type="submit" className="btn btn-primary">Submit</button>
+      {game.state === '2' ? (
+        <div className="row">
+          <div className="col-sm-12">
+            <h2>Commit Move</h2>
+            <form onSubmit={(e) => commitMove(e)}>
+              <div className="form-group">
+                <label htmlFor="move">Move</label>
+                <select className="form-control" id="move">
+                  <option value="1">Rock</option>
+                  <option value="2">Paper</option>
+                  <option value="3">Scissors</option>
+                </select>
               </div>
-            </div>
-          ) : null}
+              <button type="submit" className="btn btn-primary">
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {game.state === '3' ? (
+        <div className="row">
+          <div className="col-sm-12">
+            <h2>Reveal Move</h2>
+            <button onClick={() => revealMove()} type="submit" className="btn btn-primary">
+              Submit
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
