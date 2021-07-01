@@ -175,6 +175,14 @@ function App() {
           </div>
         </div>
       ) : null}
+
+      {game.state === '4' ? (
+        <div>
+          <div>
+            <h2>Check final balances in your wallet!</h2>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
